@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout | Cartly</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
+
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <div class="flex items-center gap-6">
+                    <a href="{% url 'home' %}" class="text-3xl font-bold text-indigo-600 tracking-tight transition-transform active:scale-95">
+                        Cartly.
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="hidden md:flex items-center gap-1 text-sm text-gray-500 mr-2 whitespace-nowrap">
+                        <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Secure Checkout
+                    </span>
+                    <a href="{% url 'cart' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors active:scale-95">Return to Cart</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% include 'main/messages.html' %}
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+
+        <div class="mb-8">
+            <a href="{% url 'cart' %}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-indigo-600 transition-colors active:scale-95 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Cart
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            
+            <div class="lg:col-span-7 space-y-6">
+                
+                <div class="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Shipping Details</h2>
+                    </div>
+                    
+                    <form method="POST" action="{% url 'checkout' %}" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        <div>
+                            <label for="shipping_address" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Delivery Address
+                            </label>
+                            <textarea 
+                                id="shipping_address" 
+                                name="shipping_address" 
+                                rows="4" 
+                                class="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-shadow resize-none" 
+                                placeholder="123 Main St, Apartment 4B&#10;City, State, Zip Code&#10;Country"
+                                required>{{ default_address }}</textarea>
+                            <p class="mt-2 text-xs text-gray-500">Please include any specific building, apartment, or floor numbers.</p>
+                        </div>
+                        
+                        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95 text-lg mt-4">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Proceed to Payment
+                        </button>
+                    </form>
+                </div>
+
+                <div class="flex items-center justify-center gap-8 text-sm text-gray-500 pt-4">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        Secure 256-bit SSL
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        Razorpay Gateway
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="lg:col-span-5">
+                <div class="bg-white rounded-3xl border border-gray-100 shadow-xl p-6 sm:p-8 sticky top-24">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100">Order Summary</h3>
+                    
+                    <div class="space-y-4 mb-6 max-h-96 overflow-y-visible pr-2">
+                        {% for item in cart_items %}
+                            <div class="flex items-start gap-4">
+                                <div class="relative flex-shrink-0">
+                                    <div class="w-16 h-16 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-center p-1">
+                                        {% if item.product.get_main_image_url %}
+                                            <img src="{{ item.product.get_main_image_url }}" alt="{{ item.product.title }}" class="w-full h-full object-contain">
+                                        {% else %}
+                                            <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        {% endif %}
+                                    </div>
+                                    <span class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+                                        {{ item.quantity }}
+                                    </span>
+                                </div>
+                                
+                                <div class="flex-grow">
+                                    <h4 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug">{{ item.product.title }}</h4>
+                                    <p class="text-xs text-gray-500 mt-1">₹{{ item.product.price }} each</p>
+                                </div>
+                                
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-sm font-bold text-gray-900">₹{% widthratio item.product.price 1 item.quantity %}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="border-t border-gray-100 pt-4 space-y-3 mb-6">
+                        <div class="flex justify-between text-gray-600 text-sm">
+                            <span>Subtotal</span>
+                            <span class="font-medium text-gray-900">₹{{ total_price }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600 text-sm">
+                            <span>Shipping</span>
+                            <span class="font-medium text-emerald-600">Free</span>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-6">
+                        <div class="flex justify-between items-end">
+                            <span class="text-lg font-bold text-gray-900">Total</span>
+                            <span class="text-3xl font-extrabold text-indigo-600">₹{{ total_price }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

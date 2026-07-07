@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.title }} | Cartly</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Hide scrollbar for carousel but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
+
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <div class="flex items-center gap-6">
+                    <a href="{% url 'home' %}" class="text-3xl font-bold text-indigo-600 tracking-tight transition-transform active:scale-95">
+                        Cartly.
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    {% if request.user.is_authenticated %}
+                        <span class="hidden md:inline-block text-sm text-gray-500 mr-2">Hello, <strong>{{ request.user.username }}</strong></span>
+                        <a href="{% url 'order_history' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors active:scale-95">Orders</a>
+                        {% if request.user.profile.is_approved_seller %}
+                            <a href="{% url 'seller_dashboard' %}" class="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors active:scale-95">Seller Dashboard</a>
+                        {% endif %}
+                        <a href="{% url 'cart' %}" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm active:scale-95">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Cart
+                        </a>
+                        <a href="{% url 'logout' %}" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors active:scale-95">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors active:scale-95">Log in</a>
+                        <a href="{% url 'register' %}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors active:scale-95">Sign up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% include 'main/messages.html' %}
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <div class="mb-6">
+            <a href="{% url 'home' %}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-indigo-600 transition-colors active:scale-95 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Products
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            
+            <div class="lg:col-span-2 space-y-8">
+                
+                <div>
+                    <p class="text-sm font-bold text-indigo-600 tracking-wider uppercase mb-2">{{ product.get_category_display }}</p>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">{{ product.title }}</h1>
+                </div>
+
+                <div class="relative group rounded-3xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+                    
+                    <button onclick="document.getElementById('image-carousel').scrollBy({left: -document.getElementById('image-carousel').clientWidth, behavior: 'smooth'})" 
+                            class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center bg-white/90 text-gray-800 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-indigo-600 hover:text-white active:scale-95 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+
+                    <div id="image-carousel" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar h-[350px] sm:h-[500px]">
+                        {% for img in product.images.all %}
+                            <img src="{{ img.image.url }}" alt="{{ product.title }}" class="w-full flex-none snap-start object-contain h-full p-4 bg-white">
+                        {% empty %}
+                            <div class="w-full flex-none h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">
+                                <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <p class="font-medium">No images available.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <button onclick="document.getElementById('image-carousel').scrollBy({left: document.getElementById('image-carousel').clientWidth, behavior: 'smooth'})" 
+                            class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center bg-white/90 text-gray-800 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-indigo-600 hover:text-white active:scale-95 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+                
+                {% if product.images.count > 1 %}
+                    <p class="text-center text-sm text-gray-400">Swipe, scroll, or use the arrows to view all {{ product.images.count }} images.</p>
+                {% endif %}
+
+                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm mt-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Product Details</h2>
+                    <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">{{ product.description }}</p> 
+                </div>
+
+                <div class="bg-indigo-50/50 p-6 sm:p-8 rounded-3xl border border-indigo-100 mt-8 flex items-start gap-4">
+                    <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full flex-shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">Seller Information</h3>
+                        <p class="text-gray-700">Sold by: <strong class="text-indigo-900">{{ product.seller.company_name }}</strong></p>
+                        {% if product.seller.user %}
+                            <p class="text-gray-600 text-sm mt-1">Contact: {{ product.seller.user.user.email }}</p>
+                        {% else %}
+                            <p class="text-red-500 text-sm mt-1 font-medium"><em>This seller is no longer active on our platform.</em></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-3xl border border-gray-100 shadow-xl p-6 sm:p-8 sticky top-24">
+                    
+                    <div class="mb-8">
+                        {% if product.discount_percentage > 0 %}
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold tracking-wide">Save {{ product.discount_percentage }}%</span>
+                            </div>
+                            <h4 class="text-gray-400 text-lg line-through mb-1">MRP: ₹{{ product.mrp }}</h4>
+                            <h2 class="text-4xl font-extrabold text-emerald-600">₹{{ product.price }}</h2>
+                        {% else %}
+                            <h2 class="text-4xl font-extrabold text-emerald-600">₹{{ product.price }}</h2>
+                        {% endif %}
+                    </div>
+                    
+                    {% if product.in_stock %}
+                        <div class="flex items-center gap-2 text-emerald-600 font-medium bg-emerald-50 px-4 py-2 rounded-xl mb-6 w-fit">
+                            <span class="relative flex h-3 w-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                            </span>
+                            In Stock & Ready to Ship
+                        </div>
+                        
+                        <form action="{% url 'add_to_cart' product.id %}" method="POST" class="space-y-4">
+                            {% csrf_token %}
+                            <div>
+                                <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                                <div class="relative">
+                                    <input type="number" id="quantity" name="quantity" value="1" min="1" class="block w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium transition-shadow">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95 text-lg">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                Add to Cart
+                            </button>
+                        </form>
+                        
+                        <div class="mt-6 flex items-center justify-center gap-4 text-sm text-gray-500 border-t border-gray-100 pt-6">
+                            <div class="flex items-center gap-1">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                Secure Payment
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <div class="bg-red-50 text-red-600 font-bold p-4 rounded-xl flex items-center justify-center gap-2 mb-6">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Currently Out of Stock
+                        </div>
+                        <button disabled class="w-full bg-gray-200 text-gray-500 font-bold py-4 px-8 rounded-xl cursor-not-allowed">
+                            Unavailable
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

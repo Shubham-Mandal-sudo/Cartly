@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Analytics | Cartly Seller</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
+
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                
+                <div class="flex items-center gap-6">
+                    <a href="{% url 'home' %}" class="text-3xl font-bold text-indigo-600 tracking-tight transition-transform active:scale-95">
+                        Cartly.
+                    </a>
+                    <span class="hidden md:inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider rounded-full">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        Analytics
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="hidden md:inline-block text-sm text-gray-500 mr-2">
+                        Store: <strong class="text-gray-900">{{ request.user.profile.sellerprofile.company_name }}</strong>
+                    </span>
+                    <a href="{% url 'seller_dashboard' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors active:scale-95">Back to Dashboard</a>
+                    <a href="{% url 'logout' %}" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors active:scale-95">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% include 'main/messages.html' %}
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+
+        <div class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-1">Sales Overview</h1>
+            <p class="text-sm text-gray-500">Track your revenue, analyze trends, and manage order fulfillment.</p>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 mb-8 flex flex-col xl:flex-row xl:items-center gap-6 justify-between">
+            
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Quick Filters</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="?filter=today" class="px-4 py-2 text-sm font-bold rounded-xl border transition-colors active:scale-95 {% if time_filter == 'today' %}bg-indigo-600 text-white border-indigo-600 shadow-md{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">Today</a>
+                    <a href="?filter=week" class="px-4 py-2 text-sm font-bold rounded-xl border transition-colors active:scale-95 {% if time_filter == 'week' %}bg-indigo-600 text-white border-indigo-600 shadow-md{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">This Week</a>
+                    <a href="?filter=month" class="px-4 py-2 text-sm font-bold rounded-xl border transition-colors active:scale-95 {% if time_filter == 'month' %}bg-indigo-600 text-white border-indigo-600 shadow-md{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">This Month</a>
+                    <a href="?filter=year" class="px-4 py-2 text-sm font-bold rounded-xl border transition-colors active:scale-95 {% if time_filter == 'year' %}bg-indigo-600 text-white border-indigo-600 shadow-md{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">This Year</a>
+                    <a href="?filter=all" class="px-4 py-2 text-sm font-bold rounded-xl border transition-colors active:scale-95 {% if time_filter == 'all' %}bg-indigo-600 text-white border-indigo-600 shadow-md{% else %}bg-white text-gray-600 border-gray-200 hover:bg-gray-50{% endif %}">Lifetime</a>
+                </div>
+            </div>
+
+            <div class="xl:border-l xl:border-gray-100 xl:pl-6">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Custom Range</p>
+                <form method="GET" action="{% url 'seller_sales' %}" class="flex flex-wrap items-end gap-3">
+                    <div>
+                        <label for="start_date" class="block text-xs font-medium text-gray-500 mb-1">From</label>
+                        <input type="date" id="start_date" name="start_date" value="{{ start_date }}" required class="block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow">
+                    </div>
+                    
+                    <div>
+                        <label for="end_date" class="block text-xs font-medium text-gray-500 mb-1">To</label>
+                        <input type="date" id="end_date" name="end_date" value="{{ end_date }}" required class="block w-full px-3 py-2 border border-gray-200 rounded-xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow">
+                    </div>
+                    
+                    <button type="submit" class="px-5 py-2 h-[38px] bg-gray-900 text-white text-sm font-bold rounded-xl shadow-md hover:bg-gray-800 transition-colors active:scale-95">
+                        Search
+                    </button>
+                    
+                    {% if time_filter == 'custom' %}
+                        <a href="{% url 'seller_sales' %}" class="px-4 py-2 h-[38px] flex items-center justify-center text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors active:scale-95">
+                            Clear
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+            
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 relative overflow-hidden flex items-center gap-6">
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Total Revenue</h3>
+                    <h1 class="text-4xl font-extrabold text-emerald-600 tracking-tight">₹{{ total_revenue|floatformat:2 }}</h1>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 relative overflow-hidden flex items-center gap-6">
+                <div class="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Goods Sold</h3>
+                    <h1 class="text-4xl font-extrabold text-indigo-600 tracking-tight">{{ total_items_sold }} <span class="text-lg font-bold text-gray-400">units</span></h1>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Order History</h2>
+        <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Order_ID</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Qty</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Earnings</th>
+                            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right rounded-tr-3xl">Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for item in items %}
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
+                                    {{ item.order.created_at|date:"M j, Y" }}
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                    #{{ item.order.id }}
+                                </td>
+                                
+                                <td class="px-6 py-4 text-sm font-bold text-gray-900 line-clamp-1 min-w-[200px]">
+                                    {{ item.product.title }}
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                    {{ item.order.customer.username }}
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
+                                    {{ item.quantity }}
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-emerald-600">
+                                    ₹{% widthratio item.price_at_purchase 1 item.quantity %}
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <form method="POST" action="{% url 'seller_sales' %}" class="flex items-center justify-end gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="item_id" value="{{ item.id }}">
+
+                                        <!-- Custom Styled Select -->
+                                        <div class="relative">
+                                            <!-- FIXED: Changed 'w-full' to 'w-36' to prevent the text from truncating -->
+                                            <select name="status" class="appearance-none bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-36 pl-3 pr-8 py-1.5 cursor-pointer shadow-sm">
+                                                <option value="PENDING" {% if item.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                                <option value="PROCESSING" {% if item.status == 'PROCESSING' %}selected{% endif %}>Processing</option>
+                                                <option value="SHIPPED" {% if item.status == 'SHIPPED' %}selected{% endif %}>Shipped</option>
+                                            </select>
+                                            <!-- Custom Dropdown Arrow -->
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-sm font-bold rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            Update
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="text-center py-16 px-4">
+                                        <div class="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                        </div>
+                                        <h3 class="text-lg font-bold text-gray-900 mb-1">No sales data found</h3>
+                                        <p class="text-gray-500">There are no orders matching your selected time period.</p>
+                                        {% if time_filter != 'all' %}
+                                            <a href="{% url 'seller_sales' %}?filter=all" class="inline-block mt-4 text-sm font-bold text-indigo-600 hover:text-indigo-800">
+                                                View lifetime sales
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>
