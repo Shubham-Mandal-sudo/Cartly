@@ -446,7 +446,7 @@ def delete_product_view(request, product_id):
 def order_history_view(request):
     """Displays a customer's purchase history."""
     # prefetch_related(): A major DB optimization. It grabs the Order, OrderItems, and attached Products in just 2 queries instead of looping queries (N+1 problem)
-    orders = Order.objects.filter(customer=request.user).order_by('-created_at').prefetch_related('items__product')
+    orders = Order.objects.filter(customer=request.user, is_paid=True).order_by('-created_at').prefetch_related('items__product')
     return render(request, 'main/order_history.html', {'orders': orders})
 
 
@@ -469,7 +469,7 @@ def seller_sales_view(request):
         return redirect('seller_sales')
 
     # --- 2. FETCH AND FILTER SALES DATA (GET) ---
-    items = OrderItem.objects.filter(product__seller=seller).order_by('-order__created_at')
+    items = OrderItem.objects.filter(product__seller=seller, order__is_paid=True).order_by('-order__created_at')
 
     time_filter = request.GET.get('filter', 'all')
     now = timezone.now()
